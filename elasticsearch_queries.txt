@@ -889,4 +889,266 @@ POST /test_index_2/_doc
 
 GET /test_index_2/_mapping
 
+PUT /analyzer_test
+{
+  "settings":{
+    "analysis":{
+      "analyzer":{
+        "my_custom_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter":[
+            "lowercase",
+            "stop",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+PUT /analyzer_test2
+{
+  "settings":{
+    "analysis":{
+      "filter":{
+        "danish_stop":{
+          "type":"stop",
+          "stopwords": "_danish_"
+        }
+      },
+      "analyzer":{
+        "my_custom_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter":[
+            "lowercase",
+            "danish_stop",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+PUT /analyzer_test3
+{
+  "settings":{
+    "analysis":{
+      "filter":{
+        "danish_stop":{
+          "type":"stop",
+          "stopwords": "_danish_"
+        }
+      },
+      "char_filter" : {},
+      "tokenizer" : {},
+      "analyzer":{
+        "my_custom_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter":[
+            "lowercase",
+            "danish_stop",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+POST /_analyze
+{
+  "analyzer":"standard",
+  "text" : "I&apos;m in a <em>good<em> mood&nbsp;-&nbsp;and I <strong>love</strong> açai!"
+}
+
+POST /_analyze
+{
+  "char_filter": ["html_strip"],
+  "text" : "I&apos;m in a <em>good<em> mood&nbsp;-&nbsp;and I <strong>love</strong> açai!"
+}
+
+POST /analyzer_test/_analyze
+{
+  "analyzer":"my_custom_analyzer",
+  "text" : "I&apos;m in a <em>good<em> mood&nbsp;-&nbsp;and I <strong>love</strong> açai!"
+}
+
+POST /analyzer_test2/_analyze
+{
+  "analyzer":"my_custom_analyzer",
+  "text" : "I&apos;m in a <em>good<em> mood&nbsp;-&nbsp;and I <strong>love</strong> açai!"
+}
+
+// Adding and updating existing analyzer and see the changes of analyzer above
+PUT /analyzer_test/_settings
+{
+  "analysis":{
+      "analyzer":{
+        "my_second_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter":[
+            "lowercase",
+            "stop",
+            "asciifolding"
+          ]
+        }
+      }
+  }
+}
+
+POST /analyzer_test/_close
+POST /analyzer_test/_open
+
+GET /analyzer_test/_settings
+
+GET /analyzer_test/_mapping
+
+PUT /analyzer_test/_mapping
+{
+  "properties":{
+    "description":{
+      "type":"text",
+      "analyzer":"my_custom_analyzer"
+    }
+  }
+}
+
+POST /analyzer_test/_doc
+{
+  "description":"Is that what you need to do ?"
+}
+
+post /analyzer_test/_close
+post /analyzer_test/_open
+
+PUT /analyzer_test/_settings
+{
+  "settings":{
+    "analysis":{
+      "analyzer":{
+        "my_custom_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter":[
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+GET /analyzer_test/_search
+{
+  "query":{
+    "match":{
+      "description": {
+        "query": "that",
+        "analyzer": "keyword"
+      }
+    }
+  }
+}
+
+//reindexed, normally with analyzer_test, there was only one result but now two with this.
+POST analyzer_test/_update_by_query?conflicts=proceed
+
+
+PUT /test_map4
+{
+  "mappings": {
+    "properties": {
+      "title": { 
+        "type": "text",
+        "fields": {
+          "en": { 
+            "type":     "text",
+            "analyzer": "english"
+          },
+          "fr": { 
+            "type":     "text",
+            "analyzer": "french"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET test_map4/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "ce n'est pas",
+      "fields": [ 
+        "title",
+        "title.en",
+        "title.fr"
+      ]
+    }
+  }
+}
+
+GET /test_map4/_mapping
+
+GET /test_map4/_search
+
+PUT /test_map4/_doc/2
+{
+  "title":"test_en ce n'est pas"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
