@@ -1111,24 +1111,175 @@ PUT /test_map4/_doc/2
 }
 
 
+/// SEARCHES --------------------
+GET /products/_mapping
 
+GET /products/_search
+{
+  "query": {
+    "match_all": {
+      
+    }
+  }
+}
 
+GET /products/_search 
+{
+  "query": {
+    "term": {
+      "name.keyword":"Wine - Maipo Valle Cabernet"
+    }
+  }
+}
 
+GET /products/_search 
+{
+  "query": {
+    "term": {
+      "tags.keyword": "Vegetable"
+    }
+  }
+}
 
+GET /products/_search 
+{
+  "query": {
+    "term": {
+      "is_active": true
+    }
+  }
+}
 
+GET /products/_search 
+{
+  "query": {
+    "term": {
+      "tags.keyword": {
+        "value": "2004/05/13"
+      }
+    }
+  }
+}
 
+//Case insensitive term
+GET /products/_search 
+{
+  "query": {
+    "term": {
+      "tags.keyword": {
+        "value": "vegetable",
+        "case_insensitive":true
+      }
+    }
+  }
+}
 
+//tags.keyword CONTAINS "Soup" AND/OR "Meat" (Case sensitive)
+//The terms query does not currently support the case insensitive query option
+GET /products/_search 
+{
+  "query": {
+    "terms": {
+      "tags.keyword": [
+        "Vegetable",
+        "Soup"
+      ]
+    }
+  }
+}
 
+//Retrieving Documents by IDs
+GET /products/_search 
+{
+  "query": {
+    "ids" : {
+      "values" : [
+        "100",  "200", "300"
+      ]
+    }
+  }
+}
 
+//Range searches 
+//Boundries included > <
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "in_stock": {
+        "gte": 1,
+        "lte": 5
+      }
+    }
+  }
+}
 
+//Boundries not included >= <=
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "in_stock": {
+        "gt": 1,
+        "lt": 5
+      }
+    }
+  }
+}
 
+//Data type is automatically understood
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "created": {
+        "gte": "2008/01/01",
+        "lte": "2020/01/31"
+      }
+    }
+  }
+}
 
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "created": {
+        "gte": "2008/01/01 00:00:00",
+        "lte": "2020/01/31 23:59:59"
+      }
+    }
+  }
+}
 
+//query range with format
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "created": {
+        "format": "yyyy/MM/dd", 
+        "gte": "2011/11/06",
+        "lte": "2020/01/31"
+      }
+    }
+  }
+}
 
-
-
-
-
+//query range with timezone
+GET /products/_search 
+{
+  "query": {
+    "range": {
+      "created": {
+        "format": "yyyy/MM/dd", 
+        "time_zone": "+03:00", 
+        "gte": "2011/11/06",
+        "lte": "2020/01/31"
+      }
+    }
+  }
+}
 
 
 
