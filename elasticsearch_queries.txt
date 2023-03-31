@@ -1281,22 +1281,140 @@ GET /products/_search
   }
 }
 
+//PREFIX - WILDCARDS - REGULAR EXPRESSIONS
+
+//Prefix
+GET /products/_search 
+{
+  "query": {
+    "prefix": {
+      "name.keyword": {
+        "value": "Past"
+      }
+    }
+  }
+}
+
+GET /products/_search 
+{
+  "query": {
+    "prefix": {
+      "tags.keyword": {
+        "value": "Past"
+      }
+    }
+  }
+}
+
+//Wildcard
+GET /products/_search 
+{
+  "query": {
+    "wildcard": {
+      "tags.keyword": {
+        "value": "Bee*"
+      }
+    }
+  }
+}
+
+GET /products/_search 
+{
+  "query": {
+    "wildcard": {
+      "tags.keyword": {
+        "value": "Bee?"
+      }
+    }
+  }
+}
+
+//Regexp
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": "Bee(f|r)+"
+      }
+    }
+  }
+}
+// After Bee, all letter between a-z and A-Z
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": "Bee[a-zA-Z]+"
+      }
+    }
+  }
+}
+
+// 1 letter after Bee
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": "Bee(f|r){1}"
+      }
+    }
+  }
+}
+
+//Get all starting with Bee
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": "Bee.*"
+      }
+    }
+  }
+}
+
+//Get all ending with erage
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": ".*erage"
+      }
+    }
+  }
+}
+
+//Get all including Beer
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": ".*Beer.*"
+      }
+    }
+  }
+}
+
+//Case insensitive
+GET /products/_search 
+{
+  "query": {
+    "regexp": {
+      "tags.keyword": {
+        "value": "beer.*",
+        "case_insensitive" : true
+      }
+    }
+  }
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// -------------------------------------------
 
 
 
