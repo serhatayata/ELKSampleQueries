@@ -1416,6 +1416,63 @@ GET /products/_search
 
 // -------------------------------------------
 
+// Querying by field existence
+
+GET /products/_search 
+{
+  "query": {
+    "exists": {
+      "field": "tags.keyword"
+    }
+  }
+}
+
+// If tags is an empty array, it will act like it doesn't exists
+POST /products/_doc
+{
+  "name" : "Protein Powder",
+  "tags" : ["Supplement"]
+}
+
+POST /products/_doc
+{
+  "name" : "Toast",
+  "tags": [] // will act like this doesn't exists...
+}
+
+// Not existing
+
+GET /products/_search 
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "tags.keyword"
+          }
+        }
+      ]
+    }
+  }
+}
+
+// FULL TEXT QUERIES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
