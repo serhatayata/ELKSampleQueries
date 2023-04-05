@@ -1459,6 +1459,295 @@ GET /products/_search
 
 // FULL TEXT QUERIES
 
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "body": "SHARDING"
+    }
+  }
+}
+
+// pasta and PASTA not differs because while indexing they are indexed as lowercase
+// by the way, full text searches are analyzed, not like Term level queries
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name" : "pasta"
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name" : "PASTA"
+    }
+  }
+}
+
+// name contains multiple terms but it seperates them and 
+// searches if the name has "pasta" OR "chicken"
+// we can also use to decide whether we will use "OR" or "AND"
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name" : "pasta chicken"
+    }
+  }
+}
+
+// Relevance scoring
+GET /products/_search
+{
+  "sort" : [
+    "_score"  
+  ],
+  "query":{
+    "match": {
+      "name" : {
+        "query" :"pasta"
+      }
+    }
+  }
+}
+
+// Searching Multiple Fields
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "vegetable",
+      "fields": ["name","tags"]
+    }
+  }
+}
+
+// by using '^' , you can multiply the relevance score
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "vegetable",
+      "fields": ["name^2","tags"]
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "pasta chicken",
+      "fields": ["name","tags"],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "pasta chicken",
+      "fields": ["name","tags"]
+    }
+  }
+}
+
+// Calculation
+// "name" --> 12,69 score
+// "tags" --> 5,56 score
+// description --> N/A
+// ingredients --> 4,55
+// then 12,69 + 5,56*0.3 + 0 + 4,55*0.3
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "pasta chicken",
+      "fields": ["name","tags","description","ingredients"],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+// by using *_ you can have a prefix for field, for example firstname-lastname --> *_name
+GET /products/_search
+{
+  "query" : {
+    "multi_match": {
+      "query": "pasta chicken",
+      "fields": ["name","*_gs"],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+// Types - best field
+GET /products/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query":      "pasta chicken",
+      "type":       "best_fields",
+      "fields":     [ "name", "description" ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+// This query will act like below
+GET /products/_search
+{
+  "query" : {
+    "dis_max": {
+      "queries": [
+        { "match": { "name": "pasta chicken" }},
+        { "match": { "description": "pasta chicken" }}
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
+
+//With operator "and", all terms must be present in a single field
+GET /products/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query":      "pasta chicken",
+      "type":       "best_fields",
+      "fields":     [ "name", "description" ],
+      "operator": "and"
+    }
+  }
+}
+// With operator "or", one of the field must be present in a single field
+GET /products/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query":      "pasta chicken",
+      "type":       "best_fields",
+      "fields":     [ "name", "description" ],
+      "operator": "or"
+    }
+  }
+}
+
+// Most fields
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query":      "pasta chicken",
+      "type":       "most_fields",
+      "fields":     [ "name", "description" ]
+    }
+  }
+}
+
+// Phrase and Phrase_prefix
+
+GET /products/_search
+{
+  "query" : {
+    "multi_match" : {
+      "query":      "pasta c",
+      "type":       "phrase_prefix",
+      "fields":     [ "name", "description" ]
+    }
+  }
+}
+
+// Phrase search
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": "Fanta Zero"
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": "Zero Fanta"
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "description": "Fanta Zero"
+    }
+  }
+}
+
+POST /_analyze
+{
+  "text":"Fresh egg pasta in a sauce made from tangy feta and dried chilli",
+  "analyzer" : "standard"
+}
+
+GET /products/_search
+{
+  "query":{
+    "match_phrase": {
+      "description": "Fresh egg pasta"
+    }
+  }
+}
+
+// will be matched
+GET /products/_search
+{
+  "query":{
+    "match_phrase": {
+      "description": "made from tangy"
+    }
+  }
+}
+
+// not matched because order isn't correct
+GET /products/_search
+{
+  "query":{
+    "match_phrase": {
+      "description": "Fresh made from tangy"
+    }
+  }
+}
+
+// matched because "match" doesn't care about position, only cares whether it exists or not
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "description": "Fresh made from tangy"
+    }
+  }
+}
+
+
+
+
+
+
+
+
 
 
 
