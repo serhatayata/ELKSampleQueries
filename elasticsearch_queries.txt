@@ -1741,12 +1741,427 @@ GET /products/_search
   }
 }
 
+// Compound Queries
 
+// Leaf Queries --> independent single query
+// Compound query --> multiple queries for an algorithm
 
+// 2 queries will be combined below
 
+GET /products/_search
+{
+  "query":{
+    "term": {
+      "tags": {
+        "value": "Alcohol"
+      }
+    }
+  }
+}
 
+GET /products/_search
+{
+  "query":{
+    "range": {
+      "in_stock": {
+        "lte": 5
+      }
+    }
+  }
+}
 
+// BOOL QUERIES
 
+//SQL QUERY :
+
+// minimum_should_match : 1 --> at least one of them will match, if 2 then at least two of them will match
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        { "term": {
+            "tags.keyword": {
+              "value": "Alcohol"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Wine"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          }
+        },
+        {
+          "match": {
+            "name": "beer"
+          }
+        },
+        {
+          "match": {
+            "description": "beer"
+          }
+        }
+      ],
+      "minimum_should_match": 2
+    }
+  }
+}
+
+// Filter
+
+// similar to must 
+// ignores relevance scores (Better performance)
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "tags.keyword": "Alcohol"
+          }
+        }
+      ]
+    }
+  }
+}
+
+// Match and bool > must > term queries SAME
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": "PASTA ravioli"
+    }
+  }
+}
+
+//This term doesn't match
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "name": {
+              "value": "pasta ravioli"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": "PASTA"
+    }
+  }
+}
+
+//This term matches
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "name": {
+              "value": "pasta"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// Match and bool > should > term queries SAME
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": "PASTA CHICKEN"
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "name": {
+              "value": "pasta"
+            }
+          }
+        },
+        {
+          "term": {
+            "name": {
+              "value": "chicken"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// Match and bool > must > term with operator SAME
+
+GET /products/_search
+{
+  "query":{
+    "match": {
+      "name": {
+        "query": "PASTA CHICKEN",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "name": {
+              "value": "pasta"
+            }
+          }
+        },
+        {
+          "term": {
+            "name": {
+              "value": "chicken"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// Select * From Products WHERE (tags IN ('Beer') OR name LIKE '%Beer%') AND in_stock <= 100
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "term": {
+                  "tags.keyword": {
+                    "value": "Beer"
+                  }
+                }
+              },
+              {
+                "term": {
+                  "name": {
+                    "value": "Beer"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+// SAME AS ABOVE
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          }
+        },
+        {
+          "term": {
+            "name": {
+              "value": "Beer"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+// You can use it without Must > bool > should > term  by using minimum_should_match
+
+// WHERE tags IN ('Beer') AND (name LIKE '%Beer%' OR description LIKE '%Beer%') AND in_stock <= 100
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "name": "Beer"
+          }
+        },
+        {
+          "match": {
+            "description": "Beer"
+          }
+       }
+      ],
+      "minimum_should_match": 1, 
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          } 
+        }
+      ]
+    }
+  }
+}
+
+// SAME AS ABOVE
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "name": "Beer"
+                }
+              },
+              {
+                "match": {
+                  "description": "Beer"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          } 
+        }
+      ]
+    }
+  }
+}
+
+// With a single query (SAME AS ABOVE)
+
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          } 
+        }
+      ],
+      "must": [
+        {
+          "multi_match": {
+            "query": "Beer",
+            "fields": ["name","description"]
+          }
+        }
+      ]
+    }
+  }
+}
 
 
 
