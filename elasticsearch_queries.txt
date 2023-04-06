@@ -2163,6 +2163,169 @@ GET /products/_search
   }
 }
 
+// BOOSTING QUERY
+
+// The bool query enables us to increase relevance scores with should
+// If we want to decrease relevance score :::
+
+GET /products/_search
+{
+  "size" : 20,
+  "query" : {
+    "match": {
+      "name": "JUICE"
+    }
+  }
+}
+
+// 0.5 with negative boost
+GET /products/_search
+{
+  "size" : 20,
+  "query" : {
+    "boosting": {
+      "positive": {
+        "match": {
+          "name": "juice"
+        }
+      },
+      "negative": {
+        "match": {
+          "name": "apple"
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
+GET /products/_search
+{
+  "size" : 20,
+  "query" : {
+    "boosting": {
+      "positive": {
+        "match_all": {}
+      },
+      "negative": {
+        "match": {
+          "name": "apple"
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
+// Increasing relevance score of name containing 'pasta' by using should 
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "match_all": {}
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "name": {
+              "value": "pasta"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// Decreasing relevance score of name containing 'coffee' by using boosting
+
+GET /products/_search
+{
+  "query":{
+    "boosting": {
+      "positive": {
+        "match_all": {}
+      },
+      "negative": {
+        "term": {
+          "name": {
+            "value": "coffee"
+          }
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
+// Both 'pasta' and 'coffee'
+
+// I like pasta, but not coffee
+
+GET /products/_search
+{
+  "query":{
+    "boosting": {
+      "positive": {
+        "term": {
+          "name": {
+            "value": "pasta"
+          }
+        }
+      },
+      "negative": {
+        "term": {
+          "name": {
+            "value": "coffee"
+          }
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
+// Boosting multiple queries, compound query
+
+// I like pasta, but not coffee
+
+GET /products/_search
+{
+  "query":{
+    "boosting": {
+      "positive": {
+        "bool": {
+          "must": [
+            {
+              "match_all": {}
+            }
+          ],
+          "should": [
+            {
+              "term": {
+                "name": {
+                  "value": "pasta"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "negative": {
+        "term": {
+          "name": {
+            "value": "coffee"
+          }
+        }
+      },
+      "negative_boost": 0.5
+    }
+  }
+}
+
 
 
 
