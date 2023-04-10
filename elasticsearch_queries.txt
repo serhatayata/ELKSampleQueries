@@ -2326,11 +2326,317 @@ GET /products/_search
   }
 }
 
+// SOME PRACTICES
 
+// SQL: SELECT * FROM products  WHERE tags IN ("Alcohol")
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Alcohol"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
 
+//SQL: SELECT * FROM products WHERE tags IN ("Alcohol") AND tags NOT IN ("Wine")
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Alcohol"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Wine"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
 
+// SELECT * FROM products WHERE tags IN ('Beer') AND in_stock <= 20
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 20
+            }
+          }
+        }
+      ]
+    }
+  }
+}
 
+// SELECT * FROM products WHERE tags LIKE 'Bevera%' AND NOT LIKE 'Alco%'
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "prefix": {
+            "tags.keyword": {
+              "value": "Bevera"
+            }
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "prefix": {
+            "tags.keyword": {
+              "value": "Alco"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
 
+// SELECT * FROM products WHERE tags LIKE 'Bevera%' AND NOT LIKE 'Alco%'
+GET /products/_search
+{
+  "query" : {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "tags.keyword": "Wine"
+          }
+        }
+      ],
+      "should": [
+        {
+          "prefix": {
+            "description.keyword": {
+              "value": "Curabitur"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+// If only should is used, then it will be like 'OR' if not it will be only used for boost
+GET /products/_search
+{
+  "query":{
+    "bool": {
+      "should": [
+        {
+          "term": {
+            "tags.keyword": {
+              "value": "Beer"
+            }
+          }
+        },
+        {
+          "match": {
+            "name": "beer"
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "prefix": {
+            "name.keyword": {
+              "value": "B"
+            }
+          }
+        }
+      ], 
+      "should": [
+        {
+          "term": {
+            "tags.keyword": "Beer"
+          }
+        },
+        {
+          "match": {
+            "name": "beer"
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "tags.keyword": "Alcohol"
+          }
+        }
+      ],
+      "should": [
+        {
+          "prefix": {
+            "name.keyword": {
+              "value": "H"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// SQL: SELECT * FROM products WHERE (tags IN ("Beer") OR name LIKE '%Beer%') AND in_stock <= 100
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 60
+            }
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              { "term": { "tags.keyword": "Wine" } },
+              { "match": { "name": "wine" } }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 100
+            }
+          }
+        }
+      ],
+      "should": [
+        { "term": { "tags.keyword": "Wine" } },
+        { "match": { "name": "wine" } }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+// SQL: SELECT * FROM products WHERE tags IN ("Beverage") AND (name LIKE '%Wi%' OR description LIKE '%Wine%') AND in_stock <= 70
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 70
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": "Beverage"
+          }
+        }
+      ],
+      "should": [
+        { "match": { "name": "Wine" } },
+        { "match": { "description": "Wine" } }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
+
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "in_stock": {
+              "lte": 70
+            }
+          }
+        },
+        {
+          "term": {
+            "tags.keyword": "Beverage"
+          }
+        }
+      ],
+      "must": [
+        {
+          "multi_match": {
+            "query": "Wine",
+            "fields": ["name", "description"]
+          }
+        }
+      ]
+    }
+  }
+}
 
 
 
