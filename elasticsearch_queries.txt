@@ -2638,16 +2638,49 @@ GET /products/_search
   }
 }
 
+// Disjunction max (dis_max)
+// This is like multimatch queries
 
+//Highest score is 6.059989
+GET /products/_search 
+{
+  "query":{
+    "dis_max": {
+      "queries": [
+        { "match": { "name": "Beer" } },
+        { "match": { "tags": "Beer" } }
+      ]
+    }
+  }
+}
 
+// When we use tie_breaker , highest score is stabil and other will be multiplied with tie breaker
+// then multiplied value will be added to highest score...
+// Highest score is 6.975373
+GET /products/_search
+{
+  "query":{
+    "dis_max": {
+      "queries": [
+        { "match": { "name": "Beer" } },
+        { "match": { "tags": "Beer" } }
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
 
-
-
-
-
-
-
-
-
-
+//Check the difference about highest scores... it is differs from disjunction
+GET /products/_search
+{
+  "query":{
+    "multi_match": {
+      "query": "beer",
+      "fields": [
+        "description", "name"
+      ],
+      "tie_breaker": 0.3
+    }
+  }
+}
 
