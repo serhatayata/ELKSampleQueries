@@ -2684,3 +2684,184 @@ GET /products/_search
   }
 }
 
+// NESTED OBJECTS 
+
+GET /recipes/_search
+
+// Nested Objects are indexed as a group like;
+//{
+//  "ingredients" : [
+//    {
+//      "name" : "Freshly grated Parmesan cheese",
+//      "amount" : 55,
+//      "unit" : "grams"
+//    },
+//    {
+//      "name" : "Freshly ground black pepper"
+//    },
+//    {
+//      "name" : "Mixed mushrooms",
+//      "amount":225,
+//      "unit":"grams"
+//    },
+//    {
+//      "name":"Dried orecchiette",
+//      "amount":450,
+//      "unit":"grams"
+//    },
+//    {
+//      "name":"Cloves garlic",
+//      "amount":2,
+//      "unit":"pcs"
+//    }
+//  ]
+//}
+
+// these ingredients above are indexed like this
+
+//{
+//  "ingredients.name":[
+//    "Freshly grated Parmesan cheese",
+//    "Freshly ground black pepper",
+//    "Mixed mushrooms",
+//    "Dried orecchiette",
+//    "Cloves garlic"
+//  ],
+//  "ingredients.amount":[55,225,450,2],
+//  "ingredients.unit":[
+//    "grams", "grams", "grams", "pcs"
+//  ]
+//}
+
+// so, when we search for ingredients.name = parmesan and range greater or equal than 100 
+// it will give us different results from expected because it searches parmesan in all values indexed above
+// after searching, it will find Parmesan in ingredients.name's all values
+// and then searches for ingredients.amount and then it "greater or equal to 100" will be found in [55,225,450,2]
+
+// This asks 
+// if our ingredients have "parmesan" and 
+// if we have an ingredient amount greater or equal than 100
+GET /recipes/_search
+{
+  "query":{
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "ingredients.name": "parmesan"
+          }
+        },
+        {
+          "range": {
+            "ingredients.amount": {
+              "gte": 100
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// in order to get rid of this "UNPREDICTABLE" situation, we should use nested data type
+
+GET /recipes/_mapping
+
+
+//REINDEXED and added data again
+PUT /recipes
+{
+  "mappings" : {
+    "properties":{
+      "title" : { "type" : "text" },
+      "description" : { "type" : "text" },
+      "preparation_time_minutes" : { "type" : "integer" },
+      "steps" : { "type" : "text" },
+      "created" : { "type" : "date" },
+      "ratings" : { "type" : "float" },
+      "servings" : {
+        "properties" : {
+          "min" : { "type" : "integer" },
+          "max" : { "type" : "integer" }
+        }
+      },
+      "ingredients": {
+        "type" : "nested",
+        "properties" : {
+          "name" : {
+            "type" : "text",
+            "fields" : {
+              "keyword" : {
+                "type" : "keyword"
+              }
+            }
+          },
+          "amount" : { "type" : "integer" },
+          "unit" : { "type" : "keyword" }
+        }
+      }
+    }
+  }
+}
+
+// This doesn't work, we should use nested queries
+GET /recipes/_search
+{
+  "query" : {
+    "bool" : {
+      "must": [
+        {
+          "match": {
+            "ingredients.name": "parmesan"
+          }
+        },
+        {
+          "range": {
+            "ingredients.amount": {
+              "gte": 100
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+// We are searhing for an ingredient including match of "parmesan" AND less than 100 amount together
+GET /recipes/_search
+{
+  "query" : {
+    "nested" : {
+      "path": "ingredients",
+      "query": {
+        "bool" : {
+          "must": [
+            {
+              "match": {
+                "ingredients.name": "parmesan"
+              }
+            },
+            {
+              "range": {
+                "ingredients.amount": {
+                  "lte": 100
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+// Matching child objects of nested affect the parent document's relevance score
+// Each matching child oject will be calculated for relevance score
+// Relevance scoring can be configured with "score_mode"
+// avg (default) : The average relevance score of matching child objects
+// min : the minimum relevance score of matching child objects
+// max : the maximum relevance score of matching child objects
+// sum : The sum of all matching child objects' relevance scores
+// none : ignore relevance scores for matching child object
+
+
