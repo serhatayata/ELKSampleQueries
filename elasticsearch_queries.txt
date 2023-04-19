@@ -2865,3 +2865,132 @@ GET /recipes/_search
 // none : ignore relevance scores for matching child object
 
 
+// NESTED INNER HITS
+
+GET /recipes/_search
+{
+  "query" : {
+    "nested" : {
+      "path": "ingredients",
+      "inner_hits": {}, 
+      "query": {
+        "bool" : {
+          "must": [
+            {
+              "match": {
+                "ingredients.name": "parmesan"
+              }
+            },
+            {
+              "range": {
+                "ingredients.amount": {
+                  "lte": 100
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+// Normally results would be like this
+//{
+//  "took": 16,
+//  "timed_out": false,
+//  "_shards": {
+//    "total": 1,
+//    "successful": 1,
+//    "skipped": 0,
+//    "failed": 0
+//  },
+//  "hits": {
+//      "total": {
+//      "value": 3,
+//      "relation": "eq"
+//    },
+//    "max_score" : 4.4121,
+//    "hits" : [
+//      
+//    ]
+//  }
+//}
+
+// And hits of the data result above like this
+
+//{
+//  "_index": "recipes",
+//  "type":"_doc",
+//  "_id": "10",
+//  "_score": 3.9802299,
+//  "_source": {
+//    
+//  }
+//}
+
+// Inner hits like this
+// "offset" is the index of the ingredients 
+
+//"inner_hits": {
+//  "ingredients": {
+//    "hits": {
+//      "total": {
+//        "value": 1,
+//        "relation": "eq"
+//      },
+//      "max_score": 3.9802299,
+//      "hits": [
+//        {
+//          "_index": "recipes",
+//          "_id": "10",
+//          "_nested": {
+//            "field": "ingredients",
+//            "offset": 6
+//          },
+//          "_score": 3.9802299,
+//          "_source": {
+//            "name": "Finely grated Parmesan cheese",
+//            "amount": 60,
+//            "unit": "grams"
+//          }
+//        }
+//      ]
+//    }
+//  }
+//}
+
+// We can change inner hits parameters
+// inner_hits.name --> changed the title of "hits" of inner hits
+// inner_hits.size --> how many hits we will get as a result (First 10 hits) (Default : 3 hits)
+GET /recipes/_search
+{
+  "query" : {
+    "nested" : {
+      "path": "ingredients",
+      "inner_hits": {
+        "name": "my_hits",
+        "size":10
+      }, 
+      "query": {
+        "bool" : {
+          "must": [
+            {
+              "match": {
+                "ingredients.name": "parmesan"
+              }
+            },
+            {
+              "range": {
+                "ingredients.amount": {
+                  "lte": 100
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
