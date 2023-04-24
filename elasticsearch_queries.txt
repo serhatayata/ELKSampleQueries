@@ -2994,3 +2994,74 @@ GET /recipes/_search
   }
 }
 
+// NESTED FILEDS LIMITATIONS
+
+// Default 50 MAX Nested fields per index
+// Can be changed "index.mapping.nested_fields.limit" (not recommended)
+// As default, 10.000 nested objects per document, can be changed "index.mapping.nested_objects.limit" (not recommended)
+
+// If we keep orders as a nested field, doesn't make sense,
+// Nested field orders and its nested field lines
+// The number of objects between the two fields will contains the 10.000 objects limit
+// And that would be really easy to reach 10.000 orders for a shop,
+// This is not a good design
+
+//{
+//  "store_id" : "ob78s35qd",
+//  "name" : "Pizza Shack",
+//  "website":"https://pizza-shack.com",
+//  "orders" :[
+//    {
+//      "order_id" : "order-6821",
+//      "customer" : "Srht",
+//      "ordered_at" : "2023-03-02T11:56:23Z",
+//      "comment" : "can be good",
+//      "lines" : [
+//        {
+//          "product":"Veggie Deluxe",
+//          "quantity" : 2
+//        },
+//        {
+//          "product":"Meat Lover",
+//          "quantity" : 2
+//        }
+//        ...
+//      ]
+//    }
+//  ]
+//}
+
+// We should split to 2 indices, so 10.000 rule cannot be reached for an order 
+// because it will be only available for "lines" not for "orders"
+// When the order is completed, no line will be added to it so we cannot reach the limit
+
+// STORE
+
+//{
+//  "store_id" : "ob78s35qd",
+//  "name" : "Pizza Shack",
+//  "website":"https://pizza-shack.com"
+//  ...
+//}
+
+// ORDER
+
+//{
+//  "order_id" : "order-6821",
+//  "store_id" : "ob78s35qd",
+//  "customer" : "Srht",
+//  "ordered_at" : "2023-03-02T11:56:23Z",
+//  "comment" : "can be good",
+//  "lines" : [
+//    {
+//      "product":"Veggie Deluxe",
+//      "quantity" : 2
+//    },
+//    {
+//      "product":"Meat Lover",
+//      "quantity" : 2
+//    }
+//    ...
+//  ]
+//}
+
