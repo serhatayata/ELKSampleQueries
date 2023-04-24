@@ -3065,3 +3065,101 @@ GET /recipes/_search
 //  ]
 //}
 
+// JOINING QUERIES
+
+// Mapping document relationships
+
+PUT /department
+{
+  "mappings": {  
+    "properties": {
+      "join_field":{
+        "type":"join",
+        "relations" : {
+          "department" : "employee"
+        }
+      }
+    }
+  }
+}
+
+PUT /department/_doc/1
+{
+  "name" : "Development",
+  "join_field": "department"
+}
+// SAME
+PUT /department/_doc/2
+{
+  "name" : "Marketing",
+  "join_field": "department"
+}
+
+//routing -> ParentId
+PUT /department/_doc/3?routing=1
+{
+  "name" : "Srht",
+  "age" : 28,
+  "gender" : "M",
+  "join_field": {
+    "name" : "employee",
+    "parent" : 1
+  }
+}
+
+PUT /department/_doc/4?routing=2
+{
+  "name" : "Mrt",
+  "age" : 22,
+  "gender" : "M",
+  "join_field": {
+    "name" : "employee",
+    "parent" : 2
+  }
+}
+
+PUT /department/_doc/5?routing=1
+{
+  "name" : "Snna",
+  "age" : 33,
+  "gender" : "F",
+  "join_field": {
+    "name" : "employee",
+    "parent" : 1
+  }
+}
+
+PUT /department/_doc/6?routing=2
+{
+  "name" : "Edn",
+  "age" : 43,
+  "gender" : "F",
+  "join_field": {
+    "name" : "employee",
+    "parent" : 2
+  }
+}
+
+
+GET /department/_search
+{
+  "query" : {
+    "parent_id" : {
+      "type" : "employee",
+      "id" : 1
+    }
+  }
+}
+
+GET /department/_search
+{
+  "query" : {
+    "parent_id" : {
+      "type" : "employee",
+      "id" : 2
+    }
+  }
+}
+
+
+
