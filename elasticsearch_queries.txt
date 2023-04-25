@@ -3180,5 +3180,80 @@ GET /department/_search
   }
 }
 
+// Querying parent by child documents
+// SELECT d.Name, d.join_field FROM employee e INNER JOIN department d ON d.join_field = e.join_field.name WHERE e.age > 40 
+// Boosting with gender "M"
+GET /department/_search
+{
+  "query" : {
+    "has_child": {
+      "type": "employee",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "age": {
+                  "gte": 40
+                  }
+              }
+            }
+          ],
+          "should": [
+            {
+              "term": {
+                "gender.keyword": {
+                  "value": "M"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+// Score modes
+// min -> lowest score of matching child documents is mapped into the parent
+// max -> highest score of matching child documents is mapped into the parent
+// sum -> matching children's scores are summed up and mapped into the parent
+// avg -> the average score based on matching child documents is mapped into the parent
+// none -> scores of child documents are ignored. Default value
+
+// min_children -> Children count must be higher than this.
+// max_children -> Children count must be lower than this.
+
+GET /department/_search
+{
+  "query" : {
+    "has_child": {
+      "type": "employee",
+      "score_mode": "sum", 
+      "min_children": 2, 
+      "max_children": 5, 
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "age": {
+                  "gte": 20
+                  }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
 
 
