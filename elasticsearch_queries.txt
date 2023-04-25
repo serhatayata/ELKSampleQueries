@@ -3161,5 +3161,24 @@ GET /department/_search
   }
 }
 
+// Querying child documents by parent
+// To enable the score of child elements, we should set "score" for it.
+GET /department/_search
+{
+  "query" : {
+    "has_parent": {
+      "parent_type": "department",
+      "score" : true,
+      "query": {
+        "term": {
+          "name.keyword": {
+            "value": "Development"
+          }
+        }
+      }
+    }
+  }
+}
+
 
 
