@@ -3356,3 +3356,56 @@ GET /company/_search
   }
 }
 
+// PARENT - CHILD Inner Hits
+
+// First, look for Department, get parents by child
+GET /department/_search
+{
+  "query" : {
+    "has_child": {
+      "type": "employee",
+      "inner_hits": {}, 
+      "query": {
+         "bool": {
+           "must": [
+             {
+               "range": {
+                 "age": {
+                   "gte": 40
+                 }
+               }
+             }
+           ],
+           "should": [
+             {
+               "term": {
+                 "gender.keyword": {
+                   "value": "M"
+                 }
+               }
+             }
+           ]
+         }
+      }
+    }
+  }
+}
+
+// Get childs by parent
+
+GET /department/_search
+{
+  "query" : {
+    "has_parent": {
+      "parent_type": "department",
+      "inner_hits" : {},
+      "query": {
+        "term": {
+          "name.keyword": {
+            "value": "Development"
+          }
+        }
+      }
+    }
+  }
+}
