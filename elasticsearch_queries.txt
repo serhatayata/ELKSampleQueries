@@ -3249,11 +3249,110 @@ GET /department/_search
   }
 }
 
+// We have been working on one level of relations so far,
 
+// Multi Level Relations
 
+//                       Company
+//            Department  ---   Supplier
+//    Employee
 
+PUT /company
+{
+  "mappings": {
+    "properties": {
+      "join_field": {
+        "type": "join",
+        "relations": {
+          "company": [
+            "department",
+            "supplier"
+          ],
+          "department": "employee"
+        }
+      }
+    }
+  }
+}
 
+// As a routing, we have to specify the master of all, so it has to be 1
+// It was the same rules as one level relation, bu we didn't notice that because there was only one level for it.
+//First, add a company
 
+PUT /company/_doc/1
+{
+  "name" : "My Company Inc.",
+  "join_field" : "company"
+}
 
+// Add a department to this company
 
+PUT /company/_doc/2?routing=1
+{
+  "name" : "Development",
+  "join_field" : {
+    "name" : "department",
+    "parent" : 1
+  }
+}
+
+// Add an employee to this department
+
+PUT /company/_doc/3?routing=1
+{
+  "name" : "Serhat A",
+  "join_field" : {
+    "name" : "employee",
+    "parent" : 2
+  }
+}
+
+//
+PUT /company/_doc/4
+{
+  "name" : "Another Company Inc.",
+  "join_field" : "company"
+}
+
+PUT /company/_doc/5?routing=4
+{
+  "name" : "Marketing",
+  "join_field" : {
+    "name" : "department",
+    "parent" : 4
+  }
+}
+
+PUT /company/_doc/6?routing=4
+{
+  "name" : "Serhat B",
+  "join_field" : {
+    "name" : "employee",
+    "parent" : 5
+  }
+}
+// Searching multi level relations
+
+// QUERY : Search for a company which contains at least one department that has an employee named 'Serhat B'
+
+GET /company/_search
+{
+  "query" : {
+    "has_child": {
+      "type": "department",
+      "query": {
+        "has_child": {
+          "type": "employee",
+          "query": {
+            "term": {
+              "name.keyword": {
+                "value": "Serhat A"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
