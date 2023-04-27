@@ -3409,3 +3409,95 @@ GET /department/_search
     }
   }
 }
+
+
+// TERMS LOOKUP MECHANISM
+
+PUT /users/_doc/1
+{
+  "name" : "John Roberts",
+  "following" : [2,3]
+}
+
+PUT /users/_doc/2
+{
+  "name" : "Eliz Ross",
+  "following" : []
+}
+
+PUT /users/_doc/3
+{
+  "name" : "Jeremy Brooks",
+  "following" : [1,2]
+}
+
+PUT /users/_doc/4
+{
+  "name" : "Diana Moore",
+  "following" : [3,1]
+}
+
+PUT /stories/_doc/1
+{
+  "user" : 3,
+  "content" : "Wow look, a penguin"
+}
+
+PUT /stories/_doc/2
+{
+  "user" : 1,
+  "content" : "Just another day"
+}
+
+PUT /stories/_doc/3
+{
+  "user" : 1,
+  "content" : "Making search..."
+}
+
+PUT /stories/_doc/4
+{
+  "user" : 4,
+  "content" : "Great day"
+}
+
+PUT /stories/_doc/5
+{
+  "user" : 4,
+  "content" : "Yes, totally"
+}
+
+PUT /stories/_doc/6
+{
+  "user" : 2,
+  "content" : "It's chilly !"
+}
+
+
+// Explanation
+// First, it searches for Id : 1 user in users
+// When it finds the user then following would be [2,3]
+// Then it creates a new query inside like below
+
+// GET /stories/_search
+//{
+//  "query" : {
+//    "terms" : {
+//       "user" : [2,3]
+//    {  
+//  {   
+//}
+
+GET /stories/_search
+{
+   "query" : {
+     "terms" : {
+       "user" : {
+          "index" : "users",
+          "id" : "1",
+          "path" : "following"
+       }
+     }
+  }
+}
+
