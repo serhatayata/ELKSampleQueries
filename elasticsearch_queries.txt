@@ -3608,3 +3608,27 @@ GET /recipes/_search
   }
 }
 
+// Specifying the result size
+GET /recipes/_search?size=2
+{
+  "_source" : false,
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+GET /recipes/_search
+{
+  "size" : 2,
+  "_source" : false,
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+
+
