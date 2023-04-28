@@ -3630,5 +3630,18 @@ GET /recipes/_search
   }
 }
 
+//Specifying an offset (with "from")
+GET /recipes/_search
+{
+  "_source" : false,
+  "size" : 2,
+  "from": 4,
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
 
 
