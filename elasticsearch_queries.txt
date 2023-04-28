@@ -3501,3 +3501,25 @@ GET /stories/_search
   }
 }
 
+// Result Format
+// Parameter "pretty" would help us to get proper format when we send a request from for example CURL
+
+GET /recipes/_search?format=yaml
+{
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+
+GET /recipes/_search?pretty
+{
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
