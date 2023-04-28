@@ -3523,3 +3523,88 @@ GET /recipes/_search?pretty
   }
 }
 
+// Source Filtering
+
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+// with source false
+GET /recipes/_search
+{
+  "_source" : false,
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+//source with specific field
+GET /recipes/_search
+{
+  "_source" : "created",
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+//source with specific nested field
+GET /recipes/_search
+{
+  "_source" : "ingredients.name",
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+//source with specific field by using wildcard
+GET /recipes/_search
+{
+  "_source" : "ingredients.*",
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+//source with specific fields
+GET /recipes/_search
+{
+  "_source" : [
+    "ingredients.*",
+    "servings"
+  ],
+  "query" : {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
+//source with fields except one
+GET /recipes/_search
+{
+  "_source": {
+    "includes": [
+      "ingredients.*"
+    ],
+    "excludes" : "ingredients.amount"
+  },
+  "query": {
+    "match": {
+      "title": "pasta"
+    }
+  }
+}
+
