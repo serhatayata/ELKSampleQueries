@@ -1,4 +1,4 @@
-# ElasticSearch_UdemyLesson
+# ElasticSearch_SampleQueries
 Complete Guide to Elasticsearch Udemy Course queries
 
 All notes and queries (udemy.com/course/elasticsearch-complete-guide/)
