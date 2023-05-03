@@ -3829,3 +3829,61 @@ GET /orders/_search
   }
 }
 
+// Bucket Aggregations
+// we can group by value and get the info about those buckets
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "status_termss" : {
+      "terms": {
+        "field": "status"
+      }
+    }
+  }
+}
+
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "status_termss" : {
+      "terms": {
+        "field": "total_amount"
+      }
+    }
+  }
+}
+
+// If null exists, using missing we can see them
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "status_termss" : {
+      "terms": {
+        "field": "status",
+        "missing": "N/A",
+        "min_doc_count": 0
+      }
+    }
+  }
+}
+
+// We can order the result by asc or desc
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "status_termss" : {
+      "terms": {
+        "field": "status",
+        "missing": "N/A",
+        "min_doc_count": 0,
+        "order": {
+          "_key": "asc"
+        }
+      }
+    }
+  }
+}
