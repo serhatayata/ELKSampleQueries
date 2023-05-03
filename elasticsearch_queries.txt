@@ -3887,3 +3887,59 @@ GET /orders/_search
     }
   }
 }
+
+// Nested Aggregations
+
+//Combine of metric and bucket aggregations
+// Group by status and get stats about them
+GET /orders/_search
+{
+  "size" : 0,
+  "query" : {
+    "range": {
+      "total_amount": {
+        "gte": 100
+      }
+    }
+  },
+  "aggs" : {
+    "status_termss" : {
+      "terms": {
+        "field": "status"
+      },
+      "aggs": {
+        "status_stats": {
+          "stats": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
+
+// Filtering out documents
+// Get total amount lower than 50 documents and get their average
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "low_value" : {
+      "filter": {
+        "range": {
+          "total_amount": {
+            "lte": 50
+          }
+        }
+      },
+      "aggs": {
+        "avg_amount": {
+          "avg": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
+
