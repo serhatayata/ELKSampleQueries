@@ -4227,3 +4227,63 @@ GET /orders/_search
     }
   }
 }
+
+// GLOBAL AGGREGATION
+// Result will give us all orders, but hits 489 document, because "global" is not affected by search query
+GET /orders/_search
+{
+  "size" : 0,
+  "query" : {
+    "range": {
+      "total_amount": {
+        "gte": 100
+      }
+    }
+  },
+  "aggs" : {
+    "all_orders": {
+      "global": {
+        
+      },
+      "aggs": {
+        "stats_amount": {
+          "stats": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
+
+// adding one another not global aggregation
+// this will give only for query result , so for 489 documents for the aggregation
+
+GET /orders/_search
+{
+  "size" : 0,
+  "query" : {
+    "range": {
+      "total_amount": {
+        "gte": 100
+      }
+    }
+  },
+  "aggs" : {
+    "stats_expensive" : {
+      "stats": {
+        "field": "total_amount"
+      }
+    },
+    "all_orders": {
+      "global": {},
+      "aggs": {
+        "stats_amount": {
+          "stats": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
