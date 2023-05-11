@@ -4287,3 +4287,47 @@ GET /orders/_search
     }
   }
 }
+
+// Missing field values 
+POST /orders/_doc/1001
+{
+  "total_amount" : 100
+}
+
+POST /orders/_doc/1002
+{
+  "total_amount" : 100,
+  "status" : null
+}
+
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "orders_without_status" : {
+      "missing": {
+        "field": "status"
+      }
+    }
+  }
+}
+
+// we can sum missing fields
+GET /orders/_search
+{
+  "size": 0,
+  "aggs": {
+    "orders_without_status": {
+      "missing": {
+        "field": "status"
+      },
+      "aggs": {
+        "missing_sum": {
+          "sum": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
