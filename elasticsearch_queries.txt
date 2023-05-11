@@ -4110,3 +4110,120 @@ GET /orders/_search
     }
   }
 }
+
+// HISTOGRAMS
+
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "amount_distribution" : {
+      "histogram": {
+        "field": "total_amount",
+        "interval": 25
+      }
+    }
+  }
+}
+
+// with min_doc_count, if in that interval doesn't contain minimum document count of data, 
+// then it doesn't exist in the result
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "amount_distribution" : {
+      "histogram": {
+        "field": "total_amount",
+        "interval": 25,
+        "min_doc_count": 35
+      }
+    }
+  }
+}
+
+// Total amount field at least 100
+// extended_bounds : buckets will be between 0 and 500
+// Using extended_bounds only makes sense when min_doc_count is 0 (the empty buckets will never be returned if min_doc_count is greater than 0).
+GET /orders/_search
+{
+  "size" : 0,
+  "query" : {
+    "range": {
+      "total_amount": {
+        "gte": 0
+      }
+    }
+  },
+  "aggs" : {
+    "amount_distribution" : {
+      "histogram": {
+        "field": "total_amount",
+        "interval": 25,
+        "min_doc_count": 0,
+        "extended_bounds": {
+          "min": 0,
+          "max": 500
+        }
+      }
+    }
+  }
+}
+
+// Hard bound will force to start from hard_bounds.min to hard_bounds.max
+GET /orders/_search
+{
+  "size" : 0,
+  "query" : {
+    "range": {
+      "total_amount": {
+        "gte": 0
+      }
+    }
+  },
+  "aggs" : {
+    "amount_distribution" : {
+      "histogram": {
+        "field": "total_amount",
+        "interval": 25,
+        "min_doc_count": 0,
+        "hard_bounds": {
+          "min": 100,
+          "max": 500
+        }
+      }
+    }
+  }
+}
+
+// date histogram with formatted date
+
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "orders_over_time" : {
+      "date_histogram": {
+        "field": "purchased_at",
+        "calendar_interval": "month",
+        "keyed": true,
+        "format": "yyyy-MM-dd"      
+      }
+    }
+  }
+}
+
+// The missing parameter defines how documents that are missing a value should be treated. By default they will be ignored but it is also possible to treat them as if they had a value.
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "total_amount_values" : {
+      "histogram": {
+        "field": "total_amount",
+        "interval": 25,
+        "missing": 0
+      }
+    }
+  }
+}
