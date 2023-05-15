@@ -4392,12 +4392,11 @@ GET /proximity/_search
   }
 }
 
-// With this, we will get no response
 GET /proximity/_search
 {
   "query" : {
     "match": {
-      "text": {
+      "title": {
         "query": "Sauce"
       }
     }
@@ -4446,7 +4445,7 @@ GET /proximity/_search
   "query" : {
     "match": {
       "title": {
-        "query": "Saicy Tamato Souce",
+        "query": "Saae Taae Saae",
         "fuzziness": 2
       }
     }
@@ -4461,6 +4460,98 @@ GET /proximity/_search
         "query": "Spacy Sauce",
         "fuzziness": 2
       }
+    }
+  }
+}
+
+//Fuzzy query
+PUT /fuzzy-test-1/_doc/1
+{
+  "description" : "i will marry you because I love you"
+}
+
+PUT /fuzzy-test-1/_doc/2
+{
+  "description" : "i will live with harry"
+}
+
+PUT /fuzzy-test-1/_doc/3
+{
+  "description" : "i'm sorry for your loss"
+}
+
+GET /fuzzy-test-1/_search
+{
+  "query": {
+    "fuzzy": {
+      "description": {
+        "value": "harry",
+        "fuzziness": 1
+      }
+    }
+  }
+}
+
+// fuzziness "auto"
+// if the length of the term is 0,1,2 tgeb auto fuzziness will be 0
+// if 3,4,5 then it will be 1 ,
+// more than that, will be 2
+// Below it will be 1
+GET /fuzzy-test-1/_search
+{
+  "query": {
+    "fuzzy": {
+      "description": {
+        "value": "harry",
+        "fuzziness": "AUTO"
+      }
+    }
+  }
+}
+
+// Affecting relevance scoring with proximity
+GET /proximity/_search
+{
+  "query" : {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": {
+              "query": "spicy sauce"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+GET /proximity/_search
+{
+  "sort": { "_score": { "order": "desc" }},
+  "query" : {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": {
+              "query": "spicy sauce"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "title": {
+              "query": "spie sauce",
+              "fuzziness": 2, 
+              "boost": 1
+            }
+          }
+        }
+      ]
     }
   }
 }
