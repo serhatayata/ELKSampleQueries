@@ -4314,6 +4314,7 @@ GET /orders/_search
 
 // we can sum missing fields
 GET /orders/_search
+GET /orders/_search
 {
   "size": 0,
   "aggs": {
@@ -4327,6 +4328,138 @@ GET /orders/_search
             "field": "total_amount"
           }
         }
+      }
+    }
+  }
+}
+
+// Aggregating Nested Objects
+
+GET /orders/_search
+
+GET /orders/_search
+{
+  "size" : 0,
+  "aggs" : {
+    "lines" : {
+      "nested": {
+        "path": "lines"
+      },
+      "aggs": {
+        "minimum_amount": {
+          "min": {
+            "field": "lines.amount"
+          }
+        }
+      }
+    }
+  }
+}
+
+// Proximity Searches
+
+PUT /proximity/_doc/1
+{
+  "title" : "Spicy Sauce"
+}
+
+PUT /proximity/_doc/2
+{
+  "title" : "Spicy Tomato Sauce"
+}
+
+PUT /proximity/_doc/3
+{
+  "title" : "Spicy Tomato and Garlic Sauce"
+}
+
+PUT /proximity/_doc/4
+{
+  "title" : "Tomato Sauce (spicy)"
+}
+
+PUT /proximity/_doc/5
+{
+  "title" : "Spicy and very delicious Tomato Sauce"
+}
+
+GET /proximity/_search
+{
+  "query" : {
+    "match_phrase": {
+      "title": "spicy sauce"
+    }
+  }
+}
+
+// With this, we will get no response
+GET /proximity/_search
+{
+  "query" : {
+    "match": {
+      "text": {
+        "query": "Sauce"
+      }
+    }
+  }
+}
+
+// with fuzziness
+GET /proximity/_search
+{
+  "query" : {
+    "match": {
+      "title": {
+        "query": "tomat",
+        "fuzziness": 1
+      }
+    }
+  }
+}
+
+GET /proximity/_search
+{
+  "query" : {
+    "match": {
+      "title": {
+        "query": "sauva",
+        "fuzziness": 2
+      }
+    }
+  }
+}
+
+GET /proximity/_search
+{
+  "query" : {
+    "match": {
+      "title": {
+        "query": "tomdoo sau545ce",
+        "fuzziness": 1
+      }
+    }
+  }
+}
+
+GET /proximity/_search
+{
+  "query" : {
+    "match": {
+      "title": {
+        "query": "Saicy Tamato Souce",
+        "fuzziness": 2
+      }
+    }
+  }
+}
+
+GET /proximity/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "Spacy Sauce",
+        "fuzziness": 2
       }
     }
   }
