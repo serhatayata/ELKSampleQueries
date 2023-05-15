@@ -4555,3 +4555,68 @@ GET /proximity/_search
     }
   }
 }
+
+// Fuzzy Match Query
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "poota",
+        "fuzziness": 2
+      }
+    }
+  }
+}
+
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "posta",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
+
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "posta wath",
+        "operator": "and", 
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
+
+// Transposition
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "psata",
+        "fuzziness": 1
+      }
+    }
+  }
+}
+
+// Disable Transposition
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "psata",
+        "fuzziness": 1,
+        "fuzzy_transpositions": "false"
+      }
+    }
+  }
+}
