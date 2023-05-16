@@ -4662,3 +4662,96 @@ GET /recipes/_search
     }
   }
 }
+
+// Adding Synonyms
+PUT /synonyms
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "synonym_test": {
+          "type": "synonym",
+          "synonyms": [
+            "awful => terrible",
+            "awesome => great, super",
+            "elasticsearch, logstash, kibana => elk",
+            "weird, strange"
+          ]
+        }
+      },
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "synonym_test"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "description": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      }
+    }
+  }
+}
+
+POST /synonyms/_analyze
+{
+  "analyzer" : "my_analyzer",
+  "text" : "awesome"
+}
+
+POST /synonyms/_analyze
+{
+  "analyzer" : "my_analyzer",
+  "text" : "Elasticsearch"
+}
+
+POST /synonyms/_analyze
+{
+  "analyzer" : "my_analyzer",
+  "text" : "weird"
+}
+
+POST /synonyms/_analyze
+{
+  "analyzer" : "my_analyzer",
+  "text" : "Elasticsearch is awesome, but also can seem weird sometimes"
+}
+
+POST /synonyms/_doc
+{
+  "description" : "Elasticsearch is awesome, but also can seem weird sometimes"
+}
+
+GET /synonyms/_search
+{
+  "query" : {
+    "match": {
+      "description": "great"
+    }
+  }
+}
+
+GET /synonyms/_search
+{
+  "query" : {
+    "match": {
+      "description": "awesome"
+    }
+  }
+}
+
+GET /synonyms/_search
+{
+  "query" : {
+    "match": {
+      "description": "elk"
+    }
+  }
+}
