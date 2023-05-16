@@ -4755,3 +4755,42 @@ GET /synonyms/_search
     }
   }
 }
+
+//Adding synonyms from the file
+//path of /config
+PUT /synonyms_2
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "synonym_test": {
+          "type": "synonym",
+          "synonyms_path" : "analysis/synonyms.txt"
+        }
+      },
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "synonym_test"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "description": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      }
+    }
+  }
+}
+
+POST /synonyms_2/_analyze
+{
+  "analyzer" : "my_analyzer",
+  "text" : "Elasticsearch is awesome, but also can seem weird sometimes"
+}
