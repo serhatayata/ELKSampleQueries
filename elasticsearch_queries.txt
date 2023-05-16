@@ -4794,3 +4794,46 @@ POST /synonyms_2/_analyze
   "analyzer" : "my_analyzer",
   "text" : "Elasticsearch is awesome, but also can seem weird sometimes"
 }
+
+//Highlighting matching fields
+POST /highlighting/_doc/1
+{
+  "description" : "In a large pot of salted boiling water, boil pasta, potato, and green beans until pasta is al dente and potato and green beans are very tender. Drain, reserving 1 cup cooking water, and transfer pasta, potato, and green beans to a large mixing or serving bowl, ElasticSearch and awesome"
+}
+
+GET /highlighting/_search
+{
+  "_source" : false,
+  "query" : {
+    "match": {
+      "description": "ElasticSearch cup"
+    }
+  },
+  "highlight" : {
+    "fields": {
+      "description": {}
+    }
+  }
+}
+
+//with different tags
+GET /highlighting/_search
+{
+  "_source" : false,
+  "query" : {
+    "match": {
+      "description": "ElasticSearch cup"
+    }
+  },
+  "highlight" : {
+    "pre_tags": [
+      "<strong>"  
+    ], 
+    "post_tags": [
+      "</strong>"
+    ], 
+    "fields": {
+      "description": {}
+    }
+  }
+}
