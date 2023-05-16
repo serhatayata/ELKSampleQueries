@@ -4620,3 +4620,45 @@ GET /recipes/_search
     }
   }
 }
+
+// FUZZY QUERY
+
+// UPPERCASE will give no response
+// Match query would give that response, but match query is a full text query,
+// but fuzzy query is a term level query, so it cannot understand the upper or lowercase,
+// we should use fuzziness with must to get that
+GET /recipes/_search
+{
+  "query" : {
+    "fuzzy": {
+      "description": {
+        "value": "PASTA",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
+// lowercase
+GET /recipes/_search
+{
+  "query" : {
+    "fuzzy": {
+      "description": {
+        "value": "pasta",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
+// with match query
+GET /recipes/_search
+{
+  "query" : {
+    "match": {
+      "description": {
+        "query": "PASTA",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
