@@ -4694,7 +4694,7 @@ PUT /synonyms
     "properties": {
       "description": {
         "type": "text",
-        "analyzer": "my_analyzer"
+        "analyzer": "my_analyzer" // If we wanna see one way synonym search, we should use search_analyzer here
       }
     }
   }
